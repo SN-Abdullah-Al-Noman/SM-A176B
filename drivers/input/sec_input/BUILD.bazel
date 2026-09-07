@@ -1,0 +1,102 @@
+load(":ap_module.bzl", "lego_ddk_module", "KERNEL_ROOT", "COMMON_ROOT", "EXTERNAL_MODULE")
+
+cfg = []
+cfg.append(lego_ddk_module(
+    path = "drivers/input/sec_input",
+    name = "sec_common_fn",
+    config = "CONFIG_INPUT_SEC_INPUT",
+    srcs = [
+        "sec_input.c", "sec_input_irq.c", "sec_input_report.c", "spu-sign-verify.c",
+        "sec_input_stui.c", "sec_input_ic_setting.c", "sec_input_parsedt.c", "sec_cmd.c", "sec_cmd_io.c",
+    ],
+
+    hdrs = [
+        "sec_cmd.h",
+        "sec_input_kunit_dummy.h",
+        "sec_input_multi_dev.h",
+        "sec_input_rawdata.h",
+        "sec_input.h",
+        "sec_secure_touch.h",
+        "sec_tclm_v2.h",
+        "sec_trusted_touch.h",
+        "sec_tsp_dumpkey.h",
+        "sec_tsp_log.h",
+        "spu-sign-verify.h",
+    ],
+
+    conditional_srcs = {
+        "CONFIG_SEC_DEBUG_TSP_LOG":{
+            True:[
+                "sec_tsp_log.c",
+            ],
+        },
+        "CONFIG_INPUT_TOUCHSCREEN_TCLMV2":{
+            True:[
+                "sec_tclm_v2.c",
+            ],
+        },
+        "CONFIG_INPUT_SEC_SECURE_TOUCH":{
+            True:[
+                "sec_secure_touch.c",
+            ],
+        },
+        "CONFIG_INPUT_SEC_TRUSTED_TOUCH":{
+            True:[
+                "sec_trusted_touch.c",
+            ],
+        },
+        "CONFIG_TOUCHSCREEN_DUMP_MODE":{
+            True:[
+                "sec_tsp_dumpkey.c",
+            ],
+        },
+        "CONFIG_SEC_INPUT_RAWDATA":{
+            True:[
+                "sec_input_rawdata.c",
+            ],
+        },
+        "CONFIG_SEC_INPUT_MULTI_DEVICE":{
+            True:[
+                "sec_input_multi_dev.c",
+            ],
+        },
+    },
+
+    slsi_deps = [
+        KERNEL_ROOT + ":device_ddk_headers",
+        EXTERNAL_MODULE+"/bsp/class:sec_class",
+        KERNEL_ROOT + "/drivers/usb/common/vbus_notifier:vbus_notifier_module",
+        KERNEL_ROOT + "/drivers/usb/typec/manager:usb_typec_manager",
+		KERNEL_ROOT + "/drivers/gpu/drm/samsung/panel:mcd-panel",
+    ],
+
+    qcom_deps = [
+        "drivers/samsung/bsp/sec_class",
+        "drivers/usb/common/vbus_notifier/vbus_notifier_module",
+        "drivers/usb/typec/manager/usb_typec_manager",
+    ],
+    out = "sec_common_fn.ko",
+))
+
+cfg.append(lego_ddk_module(
+    path = "drivers/input/sec_input",
+    name = "sec_input_notifier",
+    config = "CONFIG_INPUT_SEC_NOTIFIER",
+    srcs = [
+        "sec_input_notifier.c",
+    ],
+
+    hdrs = [
+    ],
+
+    conditional_srcs = {
+    },
+
+    slsi_deps = [
+    ],
+
+    qcom_deps = [
+    ],
+
+    out = "sec_input_notifier.ko",
+))
